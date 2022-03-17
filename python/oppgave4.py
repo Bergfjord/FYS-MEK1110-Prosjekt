@@ -503,20 +503,6 @@ def task_4_c():
     machine = VVSolver(position=init_positions, velocity=velocities, dt=dt, L=L, t0=t0, t=t)
     pos, vel, timepoints = machine.run()
     
-    
-    # Delete lines below, doesn't belong
-    machine.plot_energy()
-    machine.ovito("temperature_measurement_n{N}")
-    runs = 1
-    machine.plot_vel_autocor(mode=f"autcorr_N{N}_runs{runs}", runs=runs
-                             )
-    machine.diffusion(mode=f"diffusionrandomstart_N{N}"
-                      )
-
-    bin_edges = np.linspace(0, L*0.6, 200)
-    machine.rdf(bin_edges = bin_edges, mode=f"rdf_binedge{round(bin_edges[0])}")
-    
-    # Don't delete this line though
     machine.msd(mode="fig")
     
     
