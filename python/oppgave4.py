@@ -27,8 +27,6 @@ class VVSolver():
         self.velocities = np.zeros_like(self.positions)
         self.velocities[0] = velocity
         self.initial_velocity = velocity
-        
-        
     
     def getaccelerations(self, pos):
         
@@ -64,7 +62,6 @@ class VVSolver():
         
         return a
     
-    
     def run(self):
         start = time.time()
         
@@ -82,11 +79,6 @@ class VVSolver():
             # Boundary conditions
             new_pos = new_pos - np.floor(new_pos/L)*L
             
-            # new_pos = np.where(new_pos>L, new_pos-L, new_pos)
-            # new_pos = np.where(new_pos<0, new_pos+L, new_pos)
-            
-            # new_pos = new_pos - np.floor(new_pos/L)*L
-            
             nextacc = self.getaccelerations(new_pos)
             velocities[i+1] = velocities[i] + 0.5*(prevacc+nextacc)*dt
             positions[i+1] = new_pos
@@ -98,8 +90,6 @@ class VVSolver():
         self.velocities = velocities
         print(f"Runtime: {int(time.time() - start)} s")
         return positions, velocities, self.timepoints
-    
-    
     
     def plot_energy(self, mode="show"):
         def calc_potential(pos, N):
@@ -357,10 +347,6 @@ class VVSolver():
         
         plt.clf()
 
-        
-
-
-
     def rdf(self, bin_edges, mode="show"):
         
         r = self.positions[-1]
@@ -399,33 +385,6 @@ class VVSolver():
         
         plt.clf()
 
-        
-    
-
-def task_4_a():
-    n=4
-    L=1.7*n # Corresponds to d = 1.7
-    
-    init_positions = lattice(n=n, L=L)
-    print((np.max(init_positions)))
-    dt =0.01
-    t0 = 0
-    t = 5
-    N = len(init_positions)
-    print(N)
-    # 256s
-    # T = 300/119.7
-    # velocities = np.random.normal(0, np.sqrt(T), size=(N,3))
-    velocities = np.zeros_like(init_positions)
-    #velocities[100] = [1,1,1]
-    
-    machine = VVSolver(position=init_positions, velocity=velocities, dt=dt, L=L, t0=t0, t=t)
-    pos, vel, timepoints = machine.run()
-    #machine.plot_temp(mode=f"{round(T*119.7)}kelvin")
-    machine.plot_energy()
-    machine.ovito("temperature_measurement")
-    print(np.mean(machine.temp))
-    
     
 def lattice(n, L):
 
@@ -444,16 +403,52 @@ def lattice(n, L):
     
     arr = np.array(arr)*(L/n)
     return arr
+    
 
+def task_4_a():
+    print("Running task_4_a")
+    n=4
+    L=1.7*n # Corresponds to d = 1.7
+    
+    init_positions = lattice(n=n, L=L)
+    print((np.max(init_positions)))
+    dt =0.01
+    t0 = 0
+    t = 5
+    N = len(init_positions)
+    print(N)
+    # 256s
+    T = 300/119.7
+    velocities = np.random.normal(0, np.sqrt(T), size=(N,3))
+
+    
+    machine = VVSolver(position=init_positions, velocity=velocities, dt=dt, L=L, t0=t0, t=t)
+    pos, vel, timepoints = machine.run()
+    machine.plot_temp()# Method in VVSolver class gives temperature over time 
+    machine.ovito("temperature_measurement")
+    print(np.mean(machine.temp)) 
+
+    # Plotting with K=180 start temp to get 94.4 (ish) equilibrium temp
+    
+    T = 180/119.7
+    velocities = np.random.normal(0, np.sqrt(T), size=(N,3))
+
+    
+    machine = VVSolver(position=init_positions, velocity=velocities, dt=dt, L=L, t0=t0, t=t)
+    pos, vel, timepoints = machine.run()
+    machine.plot_temp()# Method in VVSolver class gives temperature over time 
+    machine.ovito("temperature_measurement")
+    print(np.mean(machine.temp)) 
 
 def task_4_b():
+    print("Running task_4_b")
     n=4
     L=1.7*n # Corresponds to d = 1.7
     
     init_positions = lattice(n=n, L=L)
     dt =0.01
     t0 = 0
-    t = 30
+    t = 10
     N = len(init_positions)
     print(N)
     T = 180/119.7
@@ -462,32 +457,13 @@ def task_4_b():
     machine = VVSolver(position=init_positions, velocity=velocities, dt=dt, L=L, t0=t0, t=t)
     pos, vel, timepoints = machine.run()
     
-    #machine.plot_temp(mode=f"{round(T*119.7)}kelvin")
-    #machine.plot_energy()
-    #machine.ovito(f"N={N}")
-    # machine.plot_vel_autocor()
-    # machine.diffusion()
+    runs = 100 # Averaging over this many runs
+    machine.plot_vel_autocor(mode=f"autcorr_N{N}_runs{runs}", runs=runs)
     
-    # machine = VVSolver(position=pos[-1], velocity=vel[-1], dt=dt, L=L, t0=t0, t=t)
-    # pos, vel, timepoints = machine.run()
-    
-    #machine.plot_temp(mode=f"{round(T*119.7)}kelvin")
-    #machine.plot_energy()
-    machine.ovito("bigboi")
-    runs = 1
-    # machine.plot_vel_autocor(mode=f"autcorr_N{N}_runs{runs}", runs=runs)
-
-    # machine.diffusion(mode=f"diffusionrandomstart")
-    
-    
-    machine.plot_vel_autocor(#mode=f"autcorr_N{N}_runs{runs}", runs=runs
-                             )
-
-    machine.diffusion(#mode=f"diffusionrandomstart"
-                      )
-
+    machine.diffusion(mode=f"diffusionrandomstart")
 
 def task_4_c():
+    print("Running task_4_c")
     n=9
     L=1.7*n # Corresponds to d = 1.7
     
@@ -505,8 +481,8 @@ def task_4_c():
     
     machine.msd(mode="fig")
     
-    
 def task_4_d():
+    print("Running task_4_d")
     n=6
     L=1.7*n # Corresponds to d = 1.7
     
@@ -527,66 +503,14 @@ def task_4_d():
     machine.rdf(bin_edges = bin_edges, mode=f"rdf_binedge{round(bin_edges[0])}")
     
     
-def mess_around():
-    n=8
-    L=1.7*n # Corresponds to d = 1.7
-    
-    init_positions = lattice(n=n, L=L)
-    dt =0.01
-    t0 = 0
-    t = 2
-    N = len(init_positions)
-    print(f"{N} atoms are in play")
-    T = 180/119.7
-    velocities = np.random.normal(0, np.sqrt(T), size=(N,3))
-    # Start sound pressure wave
-    speed = L*0.2
-    # for ind, pos in enumerate(init_positions):
-    #     if pos[0]<L*0.1:
-    #         velocities[ind][0] = speed
 
-    #     if pos[0]>L*0.5 and pos[0]<L*0.6:
-    #         velocities[ind][0] = -speed
-    
-    # Radial pressure wave
-    center = np.array([L/2, L/2, L/2]) 
-    for ind, pos in enumerate(init_positions):
-        if np.linalg.norm(pos-center)>0.3*L:
-            velocities[ind] = -speed * (pos-center) / np.linalg.norm(pos-center)
-        
-        # if np.linalg.norm(pos-center)<0.3*L:
-        #     velocities[ind] = speed * (pos-center) / np.linalg.norm(pos-center)
-        
-        
-        
-    # #velocities[50] = [1,1,1]
-    machine = VVSolver(position=init_positions, velocity=velocities, dt=dt, L=L, t0=t0, t=t)
-    pos, vel, timepoints = machine.run()
-    
-    
-    # # Delete lines below, doesn't belong
-    # machine.plot_energy()
-    machine.ovito(f"n{N}superpressure_wave_radial_speed{round(speed,0)}")
-    # runs = 1
-    # machine.plot_vel_autocor(mode=f"autcorr_N{N}_runs{runs}", runs=runs
-    #                          )
-    # machine.diffusion(mode=f"diffusionrandomstart_N{N}"
-    #                   )
-
-    # bin_edges = np.linspace(0, L*0.6, 200)
-    # machine.rdf(bin_edges = bin_edges, mode=f"rdf_binedge{round(bin_edges[0])}")
-    
-    # # Don't delete this line though
-    # machine.msd(mode="fig")
-    
     
 if __name__ == "__main__":
-    mess_around()
-
-    
-    
-    
-    
+    # task_4_a()
+    # task_4_b()
+    # task_4_c()
+    # task_4_d()
+    pass
     
     
     
